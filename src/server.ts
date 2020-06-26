@@ -3,7 +3,7 @@ import bodyParser from "body-parser";
 import express, { Express } from "express";
 import mongoose from "mongoose";
 import fetch from "node-fetch";
-import env, { Env } from '../env';
+import env, { Env } from './env';
 import to from './util/to';
 import MaterialSchema from "./schema/material-schema";
 

@@ -16,7 +16,8 @@
     ],
     "moduleResolution": "Node",
     "noImplicitAny": false,
-    "strictNullChecks": true
+    "strictNullChecks": true,
+    "outDir": "prod"
   },
-  "include": ["index.ts","src/*.ts"]
+  "include": ["src/*.ts"]
 }
