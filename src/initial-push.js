@@ -7,17 +7,14 @@ dotenv.config();
 
 const mats = JSON.parse(fs.readFileSync('./material.json', 'utf8'));
 
-mongoose.connect(
-		"mongodb+srv://materialcluster-nnbwa.gcp.mongodb.net/material-db",
-		{
-			useNewUrlParser: true,
-			useUnifiedTopology: true,
-			auth: {
-				user: process.env.USER,
-				password: process.env.PASSWORD,
-			},
-		}
-);
+mongoose.connect(process.env.CONNECTION_URL, {
+	useNewUrlParser: true,
+	useUnifiedTopology: true,
+	auth: {
+		user: process.env.USER,
+		password: process.env.PASSWORD,
+	},
+});
   
 const db = mongoose.connection;
 db.on("error", console.error.bind(console, "connection error:"));
