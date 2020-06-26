@@ -13,6 +13,7 @@
   },
   "scripts": {
     "start": "node prod/index.js",
+    "build": "tsc",
     "start:dev": "nodemon -w src --exec \"tsc && node prod/index.js\""
   },
   "devDependencies": {
