@@ -1,0 +1,2 @@
+
+// function addEndpoints(server: AlphaDBServer)
