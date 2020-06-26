@@ -1,12 +1,13 @@
 import path from 'path';
 import Server from './server';
 
+const rootDir = process.cwd();
+
 const server = new Server();
 
-const root = process.cwd();
 
 server.app.get('/', (req, res) => {
-  res.sendFile(path.resolve(root, "index.html"));
+  res.sendFile(path.resolve(rootDir, "index.html"));
 })
 
 server.connect();

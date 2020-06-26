@@ -10,6 +10,7 @@ import MaterialSchema from "./schema/material-schema";
 
 
 export interface ServerProps {
+  name?: string;
 }
 
 export class Server {
