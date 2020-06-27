@@ -18,7 +18,7 @@ function getQueryUrl(props) {
   
   params.set('obj', JSON.stringify(obj));
   params.set('skip', props.skip || 0);
-  params.set('limit', props.limit || 25);
+  params.set('limit', props.limit || 10);
   
   if (props.select) {
     params.set('select', props.select);
@@ -430,8 +430,8 @@ function EagerResults(props) {
 function TinyBarChart(props){
   return (
 		<Recharts.AreaChart
-			width={200}
-			height={60}
+			width={150}
+			height={100}
 			data={props.data}
 			margin={{
 				top: 5,
@@ -439,7 +439,9 @@ function TinyBarChart(props){
 				left: 0,
 				bottom: 5,
 			}}>
+			<Recharts.YAxis type="number" domain={[0, 1]} hide/>
 			<Recharts.Area
+				isAnimationActive={false}
 				type="monotone"
 				dataKey="α"
 				stroke="#8884d8"
@@ -462,8 +464,27 @@ function Material(props) {
 		<div className="material-container">
 			<TinyBarChart data={data} />
 			<div className="material-details">
-        <div className="material-title">{material.description}</div>
-        <div className="material-manufacturer">{material.manufacturer}</div>
+				<div>
+					<div className="material-name">{material.name}</div>
+					<div className="material-description">
+						{material.description}
+					</div>
+					<div className="material-manufacturer">
+						{material.manufacturer}
+					</div>
+				</div>
+				<div className="material-container-bottom">
+					<div>
+						{material.tags.map((tag, index) => (
+							<span
+								key={material._id + tag + index.toString()}
+								className="tag tag-grey">
+								{tag}
+							</span>
+						))}
+					</div>
+					<span className="material-source">{material.source}</span>
+				</div>
 			</div>
 		</div>
   );

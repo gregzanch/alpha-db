@@ -121,6 +121,53 @@ input[type="search"]::-webkit-search-results-decoration { display: none;
   grid-template-columns: auto 1fr;
 }
 
+.material-details{
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  padding: .5em;
+}
+
+.material-description{
+  font-size: 12px;
+  color: #606060;
+}
+
+.material-source{
+  font-size: 12px;
+  color: #606060;
+  display: flex;
+  justify-content: flex-end;
+}
+
+.material-container-bottom{
+  display: flex;
+  justify-content: space-between;
+}
+
+.material-name{
+  font-size: 16px;
+  color: #030303;
+}
+
+.tag {
+  border-radius: 50rem;
+  display: inline-block;
+  padding: .25em .5em;
+  font-size: .75em;
+  font-weight: 700;
+  line-height: 1;
+  color: #fff;
+  text-align: center;
+  white-space: nowrap;
+  vertical-align: baseline;
+  margin: 0.125em;
+}
+
+.tag-grey{
+  background-color: #6c757d;
+}
+
 body {
   background-color: var(--global-background-color);
   margin: 0;
