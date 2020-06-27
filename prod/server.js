@@ -60,7 +60,11 @@ class Server {
     }
     setEndpoints() {
         this.app.use(express_1.default.static(path_1.default.join(process.cwd(), 'public')));
+        this.app.get('/', (req, res) => {
+            res.sendFile(path_1.default.join(process.cwd(), "public", "index.html"));
+        });
         this.app.get('/api/material/all', MaterialMethods.getAll);
+        this.app.get('/api/material/brief', MaterialMethods.getBrief);
         this.app.get('/api/material/find', MaterialMethods.find);
     }
     start() {

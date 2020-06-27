@@ -53,7 +53,11 @@ export class Server {
   }
   private setEndpoints() {
     this.app.use(express.static(path.join(process.cwd(), 'public')));
+    this.app.get('/', (req, res) => {
+      res.sendFile(path.join(process.cwd(), "public", "index.html"));
+    })
     this.app.get('/api/material/all', MaterialMethods.getAll);
+    this.app.get('/api/material/brief', MaterialMethods.getBrief);
     this.app.get('/api/material/find', MaterialMethods.find);
   }
   start() {
