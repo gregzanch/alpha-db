@@ -40,8 +40,10 @@ export async function find(req: Request, res: Response) {
   }
 }
 
+
+
 export async function getBrief(req: Request, res: Response) {
-  const query = Material.find({}).select("description absorption");
+  const query = Material.find({}).select("description");
   const [err, docs] = await to(query.exec());
   if (err) {
   res.status(500).send("internal server error");

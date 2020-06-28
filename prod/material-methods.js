@@ -41,7 +41,7 @@ async function find(req, res) {
 }
 exports.find = find;
 async function getBrief(req, res) {
-    const query = Material.find({}).select("description absorption");
+    const query = Material.find({}).select("description");
     const [err, docs] = await to_1.default(query.exec());
     if (err) {
         res.status(500).send("internal server error");

@@ -114,6 +114,32 @@ input[type="search"]::-webkit-search-results-decoration { display: none;
   font-weight: 400;
 }
 
+.eager-results{
+  position: absolute;
+  background: white;
+  width: 50vw;
+  box-shadow: rgba(0, 0, 0, 0.2) 0px 2px 4px 0px;
+  z-index: 100;
+  /* padding-bottom: 0.25em; */
+}
+
+.eager-result{
+  color: #303030;
+  font-family: -apple-system, "BlinkMacSystemFont", "Segoe UI", "Roboto", "Oxygen", "Ubuntu", "Cantarell", "Open Sans", "Helvetica Neue", "Icons16", sans-serif;
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  font-weight: 500;
+  min-height: 1.5rem;
+  padding-right: 0.5em;
+  padding-left: 0.5em;
+  display: flex;
+  align-items: center;
+}
+
+.eager-result.eager-result-selected{
+  background: #eeeeee;
+}
+
 .material-container{
   background: white;
   margin-bottom: .5em;
@@ -199,4 +225,8 @@ body {
 
 .fill-height{
   height: 100%;
+}
+
+.hidden{
+  display: none;
 }

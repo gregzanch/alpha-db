@@ -1,5 +1,6 @@
 const { createContext, useReducer, useState, useContext } = React;
 
+const NUM_EAGER_RESULTS = 10;
 
 function getSearchQueryParams() {
 	const searchParams = new URLSearchParams(window.location.search);
@@ -28,6 +29,8 @@ function getQueryUrl(props) {
 
 	return url;
 }
+
+
 
 async function fetchResults(props) {
 	return new Promise((resolve, reject) => {
@@ -108,9 +111,30 @@ const initialState = {
 const EagerReducer = (state, action) => {
   switch (action.type) {
     case "SET_EAGER_QUERY":
+      const eagerResults = (window.quickFuse ? window.quickFuse.search(action.payload) : state.eagerResults).slice(0, NUM_EAGER_RESULTS);
+      console.log(eagerResults);
       return {
         ...state,
         eagerQuery: action.payload,
+        stagedEagerQuery: action.payload,
+        eagerResults
+      };
+    case "SET_STAGED":
+      ;
+      return {
+        ...state,
+        stagedEagerQuery: action.payload.query,
+        eagerSelectedIndex: action.payload.index,
+      };
+    case "SET_EAGER_SELECTED_INDEX":
+      return {
+        ...state,
+        eagerSelectedIndex: action.payload,
+      };
+    case "SET_VISIBLE":
+      return {
+        ...state,
+        visible: action.payload,
       };
     default:
       return state;
@@ -119,6 +143,10 @@ const EagerReducer = (state, action) => {
 
 const _eagerState = {
 	eagerQuery: query,
+	eagerSelectedIndex: 0,
+	stagedEagerQuery: query,
+  eagerResults: [],
+  visible: false,
 };
 
 const EagerContext = createContext(_eagerState);
@@ -134,8 +162,40 @@ function EagerProvider({ children }) {
 		});
   }
 
+  function setStaged({ index, query }) {
+		dispatch({
+			type: "SET_STAGED",
+			payload: {index, query},
+		});
+  }
+
+  function setEagerSelectedIndex(index) {
+		dispatch({
+      type: "SET_EAGER_SELECTED_INDEX",
+      payload: index
+		});
+  }
+  function setVisible(visible) {
+		dispatch({
+			type: "SET_VISIBLE",
+			payload: visible,
+		});
+  }
+  
+  
+
 	return (
-		<EagerContext.Provider value={{ eagerQuery: state.eagerQuery, setEagerQuery }}>
+    <EagerContext.Provider value={{
+      eagerQuery: state.eagerQuery,
+      eagerResults: state.eagerResults,
+      eagerSelectedIndex: state.eagerSelectedIndex,
+      stagedEagerQuery: state.stagedEagerQuery,
+      visible: state.visible,
+      setVisible,
+      setStaged,
+      setEagerSelectedIndex,
+      setEagerQuery
+    }}>
 			{children}
 		</EagerContext.Provider>
 	);
@@ -354,16 +414,77 @@ function CogIcon(props) {
 }
 
 function Search(props) {
-  const { eagerQuery, setEagerQuery } = useContext(EagerContext);
+  const {
+		eagerResults,
+		eagerSelectedIndex,
+		stagedEagerQuery,
+    setEagerQuery,
+    setStaged,
+    setVisible,
+  } = useContext(EagerContext);
+  
+  const [value, setValue] = useState(stagedEagerQuery);
+  
   const handleChange = (e) => {
-		setEagerQuery(e.currentTarget.value);
-	};
+    if (stagedEagerQuery !== e.currentTarget.value) {
+      setEagerQuery(e.currentTarget.value);
+      setValue(e.currentTarget.value);
+    }
+  };
+  const handleKeyDown = (e) => {
+    switch (e.key) {
+      case "ArrowDown": {
+        const index = (eagerSelectedIndex + 1) % (NUM_EAGER_RESULTS + 1);
+        const query = eagerResults[index - 1]
+			? eagerResults[index - 1].item.description
+          : stagedEagerQuery;
+        ;
+        setStaged({ index, query });
+        setValue(query);
+      } break;
+      case "ArrowUp": {
+        const index =
+          eagerSelectedIndex - 1 < 0
+            ? NUM_EAGER_RESULTS
+            : eagerSelectedIndex - 1;
+        const query = eagerResults[index - 1]
+			? eagerResults[index - 1].item.description
+          : stagedEagerQuery;
+        ;
+        setStaged({ index, query });
+        setValue(query);
+      } break;
+      case "Escape": {
+        e.preventDefault();
+        e.currentTarget.blur();
+      } break;
+      default: {
+        console.log(e.key);
+      } break;
+	  }
+  }
+
+  const handleBlur = (e) => {
+    setVisible(false);
+  }
+  
+  const handleFocus = (e) => {
+    setVisible(true);
+  }
+  const className = [
+    "search-input",
+    "fill-height"
+  ].join(' ').trimRight();
+  
   return (
 		<input
-			className="search-input fill-height"
+			className={className}
 			type="search"
 			onChange={handleChange}
-			value={eagerQuery}
+			value={value}
+			onKeyDown={handleKeyDown}
+			onBlur={handleBlur}
+			onFocus={handleFocus}
 		/>
   );
 }
@@ -375,15 +496,42 @@ function SearchBar(props) {
 
   
   const handleSubmit = e => {
-    console.log(e.currentTarget);
-    const query = e.currentTarget.querySelector('input[type="search"').value;
-    fetchResults({ query, skip: 0, limit, tags })
-		.then((res) => {
-			console.log(res);
-      setResults(res);
-      setQuery(query);
-		})
-		.catch(console.error);
+    const elt = e.currentTarget.querySelector('input[type="search"]');
+    const query = elt.value;
+    elt.blur();
+    if (window.fuse) {
+      const ids = window.fuse.search(query).slice(0,limit).map(x => x.item._id);
+      const obj = {
+        _id: {
+          $in: ids,
+        },
+      };
+      const params = new URLSearchParams();
+
+      params.set("obj", JSON.stringify(obj));
+
+
+      const url = "/api/material/find?" + params.toString();
+
+      fetch(url)
+        .then((res) => res.json())
+        .then((res) => {
+          setResults(res);
+          setQuery(query);
+        })
+        .catch(console.error);
+    }
+	
+    else {
+    
+      fetchResults({ query, skip: 0, limit, tags })
+        .then((res) => {
+          ;
+          setResults(res);
+          setQuery(query);
+        })
+        .catch(console.error);
+    }
     e.preventDefault();
   }
   
@@ -401,28 +549,60 @@ function SearchBar(props) {
 function NavBar(props) {
   return (
 		<div className="nav-bar">
-      <IconButton icon={<LogoIcon />} minimal/>
-      <SearchBar />
-      <IconButton icon={<CogIcon />} minimal/>
+			<IconButton icon={<LogoIcon />} minimal />
+			<div>
+				<SearchBar />
+				<EagerResults />
+			</div>
+			<IconButton icon={<CogIcon />} minimal />
+		</div>
+  );
+}
+
+function EagerResult(props) {
+  const item = props.item;
+  const className = [
+    "eager-result",
+    props.selected ? "eager-result-selected" : ""
+  ].join(" ").trim();
+  return (
+		<div
+      className={className}
+			onMouseOver={(e) => props.onMouseOver(e, props.index)}
+			onClick={e=>props.onClick(e,props.index)}>
+			{item.description}
 		</div>
   );
 }
 
 function EagerResults(props) {
-  const { brief, setBrief } = useContext(BriefContext);
-  const { eagerQuery, setEagerQuery } = useContext(EagerContext);
+  const { visible, eagerResults, eagerSelectedIndex, setEagerSelectedIndex } = useContext(EagerContext);
   
-	if (brief.length == 0) {
-		fetch("/api/material/brief")
-			.then((res) => res.json())
-			.then((res) => setBrief(res))
-			.catch(console.error);
+
+  
+  const handleMouseOver = (e, i) => {
+    setEagerSelectedIndex(i);
   }
+
+  const handleClick = (e, i) => {
+  }
+  
+  const className = ["eager-results",!visible ? "hidden": ""].join(" ").trimRight();
+  
   return (
-    <div className="eager-results">
-      
-    </div>
-  )
+		<div className={className}>
+			{eagerResults.map((res, index) => (
+				<EagerResult
+					item={res.item}
+					key={res.item._id + "eager" + index.toString()}
+					index={index + 1}
+					onMouseOver={handleMouseOver}
+					onClick={handleClick}
+					selected={eagerSelectedIndex == index + 1}
+				/>
+			))}
+		</div>
+  );
 }
 
 
@@ -497,12 +677,41 @@ function SearchResults(props) {
 
 
   if (shouldFetch) {
-    fetchResults({
-      query, skip, limit, tags
-    }).then(res => {
-      addResults(res);
-      console.log(res);
-    }).catch(console.error);
+    if (window.fuse) {
+      console.log(query, skip, limit);
+			const ids = window.fuse
+				.search(query)
+				.slice(skip, skip+limit)
+        .map((x) => x.item._id);
+			const obj = {
+				_id: {
+					$in: ids,
+				},
+			};
+			const params = new URLSearchParams();
+
+			params.set("obj", JSON.stringify(obj));
+
+			const url = "/api/material/find?" + params.toString();
+
+			fetch(url)
+				.then((res) => res.json())
+				.then((res) => {
+					addResults(res);
+				})
+				.catch(console.error);
+		} else {
+			fetchResults({
+				query,
+				skip,
+				limit,
+				tags,
+			})
+				.then((res) => {
+					addResults(res);
+				})
+				.catch(console.error);
+		}
   }
   return (
 		<div>
@@ -523,11 +732,32 @@ function App(props) {
   return (
     <div id="app">
       <NavBar />
-      <EagerResults />
+      
       <SearchResults />
     </div>
   )
 }
+
+fetch("/api/material/brief")
+  .then((res) => res.json())
+  .then((res) => {
+
+    window.quickFuse = new Fuse(res,  {
+      includeScore: true,
+      // Search in `author` and in `tags` array
+      threshold: 0.2,
+      distance: 100,
+      keys: ["description"],
+    });
+    window.fuse = new Fuse(res, {
+      includeScore: true,
+      // Search in `author` and in `tags` array
+      threshold: 0.2,
+      distance: 200,
+      keys: ["description", "tags"],
+    });
+  })
+  .catch(console.error);
 
 
 ReactDOM.render(
