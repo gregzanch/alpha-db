@@ -26,7 +26,6 @@ exports.Server = void 0;
 const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
-const env_1 = __importDefault(require("./env"));
 const MaterialMethods = __importStar(require("./material-methods"));
 class Server {
     constructor(props) {
@@ -38,12 +37,12 @@ class Server {
         this.started = false;
     }
     connect() {
-        mongoose_1.default.connect(env_1.default.CONNECTION_URL, {
+        mongoose_1.default.connect(process.env.DB_CONNECTION_URL, {
             useNewUrlParser: true,
             useUnifiedTopology: true,
             auth: {
-                user: env_1.default.USER,
-                password: env_1.default.PASSWORD,
+                user: process.env.DB_USERNAME,
+                password: process.env.DB_PASSWORD,
             },
         });
         this.db = mongoose_1.default.connection;
@@ -59,18 +58,18 @@ class Server {
         this.db.once("open", this.setEndpoints);
     }
     setEndpoints() {
-        this.app.use(express_1.default.static(path_1.default.join(process.cwd(), 'public')));
-        this.app.get('/', (req, res) => {
+        this.app.use(express_1.default.static(path_1.default.join(process.cwd(), "public")));
+        this.app.get("/", (req, res) => {
             res.sendFile(path_1.default.join(process.cwd(), "public", "index.html"));
         });
-        this.app.get('/api/material/all', MaterialMethods.getAll);
-        this.app.get('/api/material/brief', MaterialMethods.getBrief);
-        this.app.get('/api/material/find', MaterialMethods.find);
+        this.app.get("/api/material/all", MaterialMethods.getAll);
+        this.app.get("/api/material/brief", MaterialMethods.getBrief);
+        this.app.get("/api/material/find", MaterialMethods.find);
     }
     start() {
         if (!this.started) {
-            this.app.listen(env_1.default.PORT, env_1.default.HOST, () => {
-                console.log("http://%s:%s", env_1.default.HOST, env_1.default.PORT);
+            this.app.listen(Number(process.env.DB_PORT) || 5234, process.env.DB_HOST, () => {
+                console.log("http://%s:%s", process.env.DB_HOST, process.env.DB_PORT);
             });
         }
     }

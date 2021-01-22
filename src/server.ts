@@ -24,12 +24,12 @@ export class Server {
     this.started = false;
   }
   connect() {
-    mongoose.connect(process.env.CONNECTION_URL!, {
+    mongoose.connect(process.env.DB_CONNECTION_URL!, {
       useNewUrlParser: true,
       useUnifiedTopology: true,
       auth: {
-        user: process.env.USER!,
-        password: process.env.PASSWORD!,
+        user: process.env.DB_USERNAME!,
+        password: process.env.DB_PASSWORD!,
       },
     });
     this.db = mongoose.connection;
@@ -58,8 +58,8 @@ export class Server {
   }
   start() {
     if (!this.started) {
-      this.app.listen(Number(process.env.PORT)!, process.env.HOST!, () => {
-        console.log("http://%s:%s", process.env.HOST!, process.env.PORT!);
+      this.app.listen(Number(process.env.DB_PORT)!||5234, process.env.DB_HOST!, () => {
+        console.log("http://%s:%s", process.env.DB_HOST!, process.env.DB_PORT!);
       });
     }
   }
