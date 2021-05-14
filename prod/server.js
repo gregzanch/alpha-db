@@ -27,6 +27,7 @@ const path_1 = __importDefault(require("path"));
 const express_1 = __importDefault(require("express"));
 const mongoose_1 = __importDefault(require("mongoose"));
 const MaterialMethods = __importStar(require("./material-methods"));
+require("dotenv").config();
 class Server {
     constructor(props) {
         this.app = express_1.default();

@@ -7,6 +7,8 @@ import to from "./util/to";
 import MaterialSchema from "./material-schema";
 import * as MaterialMethods from "./material-methods";
 
+require("dotenv").config();
+
 export interface ServerProps {
   name?: string;
 }
@@ -58,9 +60,17 @@ export class Server {
   }
   start() {
     if (!this.started) {
-      this.app.listen(Number(process.env.DB_PORT)!||5234, process.env.DB_HOST!, () => {
-        console.log("http://%s:%s", process.env.DB_HOST!, process.env.DB_PORT!);
-      });
+      this.app.listen(
+        Number(process.env.DB_PORT)! || 5234,
+        process.env.DB_HOST!,
+        () => {
+          console.log(
+            "http://%s:%s",
+            process.env.DB_HOST!,
+            process.env.DB_PORT!
+          );
+        }
+      );
     }
   }
 
